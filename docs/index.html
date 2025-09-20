@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lenovo Bootloader SN Generator</title>
+
+  <style>
+    /* Fonts & Colors */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* Glass Card */
+    .card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 48px rgba(0, 255, 255, 0.2);
+    }
+
+    /* Title & Subtitle */
+    .title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+    .subtitle {
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .subtitle pre {
+      background-color: rgba(31, 41, 55, 0.85);
+      color: #f1f5f9;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+    }
+
+    /* Input & Button */
+    .input, .button {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+    .input {
+      border: none;
+      background-color: rgba(31, 41, 55, 0.85);
+      color: #f1f5f9;
+      transition: background-color 0.3s ease;
+    }
+    .input:focus {
+      outline: none;
+      background-color: rgba(56, 189, 248, 0.1);
+    }
+    .button {
+      border: none;
+      background-color: #38bdf8;
+      color: #0f172a;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .button:hover {
+      background-color: #0ea5e9;
+      transform: scale(1.02);
+    }
+
+    /* Hex output */
+    .hex-view {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: rgba(30, 41, 59, 0.85);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #93c5fd;
+      max-height: 300px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Error message */
+    #errorMessage {
+      color: #f87171;
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+      font-weight: 500;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 2rem;
+    }
+
+    /* Responsive */
+    @media(max-width: 480px){
+      .card {
+        padding: 1.5rem;
+      }
+      .title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="title">Lenovo Bootloader Unlock Code Generator</div>
+
+    <div class="subtitle">
+      <p>Generate a <strong>sn.img</strong> for Lenovo new-gen devices.</p>
+      <p>Retrieve bootloader SN with:</p>
+      <pre>fastboot getvar all</pre>
+      <p>Concatenate <em>Bootloader_SN_Part1</em> and <em>Bootloader_SN_Part2</em> OR:</p>
+      <pre>adb shell getprop ro.boot.bootload_sn</pre>
+      <p>The SN must be <strong>64 characters</strong>.</p>
+      <p>Unlock commands:</p>
+      <pre>
+fastboot flash unlock sn.img
+fastboot oem unlock</pre>
+      <p>Sample: <code>99EE50221221864D50C60BAEA6F14D8AC2E235CC6E78BE6088CD40CC97FCA394</code></p>
+      <p>Your input is processed locally and is never sent to any server.</p>
+    </div>
+
+    <input type="text" id="bootloader_sn" class="input" placeholder="Enter your 64-char bootloader SN" maxlength="100">
+    <button class="button" onclick="embedAndDownload()">Generate</button>
+
+    <div id="errorMessage"></div>
+    <div class="hex-view" id="hexOutput"></div>
+  </div>
+
+  <script>
+    function toHex(n){ return n.toString(16).padStart(2,'0'); }
+
+    function renderHexView(buffer){
+      const lines=[];
+      for(let i=0;i<buffer.length;i+=16){
+        let line=i.toString(16).padStart(4,'0')+": ";
+        let hexPart="", asciiPart="";
+        for(let j=0;j<16;j++){
+          const byte=buffer[i+j];
+          if(i+j<buffer.length){
+            hexPart+=toHex(byte)+" ";
+            asciiPart+=(byte>=32 && byte<=126)?String.fromCharCode(byte):".";
+          } else { hexPart+="   "; asciiPart+=" "; }
+        }
+        lines.push(line+hexPart+" "+asciiPart);
+      }
+      return lines.join("\n");
+    }
+
+    function hash(n){
+      let h=0x45d9f3b^n;
+      h=(h^(h>>16))*0x119de1f3;
+      h=(h^(h>>16))>>>0;
+      return h;
+    }
+
+    function bruteForce(h){
+      for(let i=0;i<256;i++){ if(hash(i)===h) return String.fromCharCode(i);}
+      return "?";
+    }
+
+    function decrypt(c){ return c.map(h=>bruteForce(h)).join(''); }
+
+    function embedAndDownload(){
+      const bootloader_sn_raw=document.getElementById("bootloader_sn").value.trim();
+      const errorDiv=document.getElementById("errorMessage");
+      const hexOutput=document.getElementById("hexOutput");
+
+      if(bootloader_sn_raw.length!==64){
+        errorDiv.textContent=`Invalid SN length (${bootloader_sn_raw.length}). Must be 64 chars.`;
+        errorDiv.style.display='block';
+        hexOutput.style.display='none';
+        return;
+      }
+      errorDiv.style.display='none';
+
+      const buffer=new Uint8Array(356);
+      const dataView=new DataView(buffer.buffer);
+
+      // magic
+      const magick=decrypt([1975295784,194624194,1088619615,1081284416,692051391,1376873270,100939420,396494126,1829556931,396494126,1384215601,785734634,497524095,1672444088,793070989,1376873270]);
+      let pos=0;
+      for(let i=0;i<magick.length;i++){ buffer[i+pos]=magick.charCodeAt(i);}
+      pos+=magick.length;
+
+      // version major & minor
+      dataView.setUint32(pos,0,true); pos+=4;
+      dataView.setUint32(pos,1,true); pos+=4;
+      pos+=8; // unknown
+      dataView.setUint32(pos,1,true); pos+=4;
+
+      // bootloader SN
+      for(let i=0;i<bootloader_sn_raw.length;i++){ buffer[i+pos]=bootloader_sn_raw.charCodeAt(i);}
+      pos+=256; // garbage
+
+      hexOutput.textContent=renderHexView(buffer);
+      hexOutput.style.display='block';
+
+      const blob=new Blob([buffer],{type:"application/octet-stream"});
+      const link=document.createElement("a");
+      link.href=URL.createObjectURL(blob);
+      link.download="sn.img";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>
