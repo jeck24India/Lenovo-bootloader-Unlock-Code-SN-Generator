@@ -3,162 +3,425 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lenovo Bootloader SN Generator</title>
-
+  <title>Generador de Código Bootloader Lenovo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    /* Fonts & Colors */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: #e5e7eb;
-      display: flex;
-      justify-content: center;
-      padding: 2rem 1rem;
+    /* Custom styles for language selector */
+    .language-selector-container {
+      position: relative;
+      min-width: 140px;
+      padding: 8px 32px 8px 12px;
     }
-
-    /* Glass Card */
-    .card {
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 1rem;
-      box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
-      max-width: 600px;
+    
+    #languageSelector {
       width: 100%;
-      padding: 2rem;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 48px rgba(0, 255, 255, 0.2);
-    }
-
-    /* Title & Subtitle */
-    .title {
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 1rem;
-    }
-    .subtitle {
-      color: #cbd5e1;
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .subtitle pre {
-      background-color: rgba(31, 41, 55, 0.85);
-      color: #f1f5f9;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.9rem;
-      overflow-x: auto;
-    }
-
-    /* Input & Button */
-    .input, .button {
-      width: 100%;
-      font-size: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-      box-sizing: border-box;
-    }
-    .input {
+      background: transparent;
       border: none;
-      background-color: rgba(31, 41, 55, 0.85);
-      color: #f1f5f9;
-      transition: background-color 0.3s ease;
-    }
-    .input:focus {
-      outline: none;
-      background-color: rgba(56, 189, 248, 0.1);
-    }
-    .button {
-      border: none;
-      background-color: #38bdf8;
-      color: #0f172a;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-    .button:hover {
-      background-color: #0ea5e9;
-      transform: scale(1.02);
-    }
-
-    /* Hex output */
-    .hex-view {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      background-color: rgba(30, 41, 59, 0.85);
-      font-family: 'Courier New', monospace;
-      font-size: 0.85rem;
-      color: #93c5fd;
-      max-height: 300px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
-
-    /* Error message */
-    #errorMessage {
-      color: #f87171;
-      text-align: center;
-      margin-bottom: 1rem;
-      display: none;
+      color: white;
+      font-size: 14px;
       font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-
-    /* Footer */
-    .footer {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 2rem;
+    
+    #languageSelector option {
+      background-color: #1e293b;
+      color: white;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-
-    /* Responsive */
-    @media(max-width: 480px){
-      .card {
-        padding: 1.5rem;
+    
+    /* Custom dropdown arrow */
+    .language-selector-container::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid rgba(255, 255, 255, 0.7);
+      pointer-events: none;
+      transition: transform 0.2s ease;
+    }
+    
+    /* Hover effect for arrow */
+    .language-selector-container:hover::after {
+      border-top-color: rgba(255, 255, 255, 0.9);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    /* Focus styles */
+    #languageSelector:focus {
+      outline: none;
+    }
+    
+    .language-selector-container:focus-within {
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5);
+    }
+    
+    /* Ensure emojis display properly */
+    #languageSelector,
+    #languageSelector option {
+      font-feature-settings: "liga" 1, "kern" 1;
+      text-rendering: optimizeLegibility;
+    }
+    
+    /* Desktop layout optimizations */
+    @media (min-width: 1024px) {
+      .desktop-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
       }
-      .title {
-        font-size: 1.5rem;
+      
+      .main-card {
+        position: sticky;
+        top: 2rem;
+      }
+      
+      .sidebar-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1023px) {
+      .desktop-grid {
+        display: block;
+      }
+      
+      .main-card {
+        position: static;
+      }
+      
+      .sidebar-cards {
+        margin-top: 2rem;
       }
     }
   </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-in-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          },
+          backgroundImage: {
+            'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+            'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+          }
+        }
+      }
+    }
+  </script>
 </head>
 
-<body>
-  <div class="card">
-    <div class="title">Lenovo Bootloader Unlock Code Generator</div>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 relative overflow-x-hidden">
+  <!-- Background Elements -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 2s;"></div>
+    <div class="absolute top-40 left-1/2 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 4s;"></div>
+  </div>
 
-    <div class="subtitle">
-      <p>Generate a <strong>sn.img</strong> for Lenovo new-gen devices.</p>
-      <p>Retrieve bootloader SN with:</p>
-      <pre>fastboot getvar all</pre>
-      <p>Concatenate <em>Bootloader_SN_Part1</em> and <em>Bootloader_SN_Part2</em> OR:</p>
-      <pre>adb shell getprop ro.boot.bootload_sn</pre>
-      <p>The SN must be <strong>64 characters</strong>.</p>
-      <p>Unlock commands:</p>
-      <pre>
-fastboot flash unlock sn.img
-fastboot oem unlock</pre>
-      <p>Sample: <code>99EE50221221864D50C60BAEA6F14D8AC2E235CC6E78BE6088CD40CC97FCA394</code></p>
-      <p>Your input is processed locally and is never sent to any server.</p>
+  <!-- Language Selector (custom with SVG flags) -->
+  <div class="fixed top-4 right-4 z-50">
+    <div id="langDropdown" class="relative">
+      <button id="langBtn" class="bg-white/10 hover:bg-white/15 border border-white/20 text-white rounded-lg px-3 py-2 text-sm font-medium shadow-lg backdrop-blur-lg flex items-center gap-2 transition">
+        <!-- injected by JS -->
+      </button>
+      <div id="langMenu" class="hidden absolute right-0 mt-2 w-40 bg-slate-900/95 border border-white/20 rounded-md shadow-2xl backdrop-blur-lg p-1">
+        <button data-lang="en" class="w-full flex items-center gap-2 px-3 py-2 text-white/90 hover:bg-white/10 rounded">
+          <span class="inline-block w-5 h-3"> 
+            <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><clipPath id="u"><path d="M0,0 v30 h60 v-30 z"/></clipPath><path fill="#bd3d44" d="M0,0 v30 h60 v-30 z"/><path stroke="#fff" stroke-width="6" d="M0,5 h60 M0,15 h60 M0,25 h60"/><path fill="#192f5d" d="M0,0 v18 h24 v-18 z"/></svg>
+          </span>
+          <span>English</span>
+        </button>
+        <button data-lang="es" class="w-full flex items-center gap-2 px-3 py-2 text-white/90 hover:bg-white/10 rounded">
+          <span class="inline-block w-5 h-3">
+            <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path fill="#c60b1e" d="M0 0h60v30H0z"/><path fill="#ffc400" d="M0 7h60v16H0z"/></svg>
+          </span>
+          <span>Español</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="relative z-10 w-full max-w-7xl mx-auto py-4">
+    <!-- Header -->
+    <div class="text-center mb-6 animate-fade-in">
+      <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full mb-2 shadow-lg">
+        <i class="fas fa-unlock-alt text-white text-xl"></i>
+      </div>
+      <h1 class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent mb-1" data-translate="title">
+        Generador de Código Bootloader
+      </h1>
+      <p class="text-lg text-slate-300 font-medium" data-translate="subtitle">Lenovo - Desbloqueo de Bootloader</p>
     </div>
 
-    <input type="text" id="bootloader_sn" class="input" placeholder="Enter your 64-char bootloader SN" maxlength="100">
-    <button class="button" onclick="embedAndDownload()">Generate</button>
+    <!-- Desktop Layout: Grid for large screens -->
+    <div class="desktop-grid">
+      <!-- Left Side: Main Card (50%) -->
+      <div class="main-card animate-slide-up">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8">
+      <!-- Instructions Section -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold text-white mb-4 flex items-center" data-translate="instructions_title">
+          <i class="fas fa-info-circle text-cyan-400 mr-3"></i>
+          Instrucciones
+        </h2>
+        
+        <div class="space-y-4 text-slate-300">
+          <div class="bg-slate-800/50 rounded-lg p-4 border-l-4 border-cyan-400">
+            <p class="font-medium text-white mb-2" data-translate="description">Genera un archivo <strong class="text-cyan-400">sn.img</strong> para dispositivos Lenovo de nueva generación.</p>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-slate-800/50 rounded-lg p-4">
+              <h3 class="font-semibold text-white mb-2 flex items-center text-sm" data-translate="fastboot_title">
+                <i class="fas fa-terminal text-green-400 mr-2"></i>
+                Obtener SN del Bootloader:
+              </h3>
+              <code class="block bg-slate-900/70 text-green-300 p-2 rounded text-sm">fastboot getvar all</code>
+            </div>
+            
+            <div class="bg-slate-800/50 rounded-lg p-4">
+              <h3 class="font-semibold text-white mb-2 flex items-center text-sm" data-translate="adb_title">
+                <i class="fas fa-mobile-alt text-blue-400 mr-2"></i>
+                Alternativa ADB:
+              </h3>
+              <code class="block bg-slate-900/70 text-blue-300 p-2 rounded text-sm">adb shell getprop ro.boot.bootload_sn</code>
+            </div>
+          </div>
+          
+          <div class="bg-amber-900/30 border border-amber-500/50 rounded-lg p-4">
+            <p class="text-amber-200" data-translate="important_note">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              <strong>Importante:</strong> El SN debe tener exactamente <strong class="text-amber-300">64 caracteres</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
 
-    <div id="errorMessage"></div>
-    <div class="hex-view" id="hexOutput"></div>
+      <!-- Input Section -->
+      <div class="mb-8">
+        <label for="bootloader_sn" class="block text-base font-semibold text-white mb-3" data-translate="input_label">
+          <i class="fas fa-key text-cyan-400 mr-2"></i>
+          Número de Serie del Bootloader
+        </label>
+        <div class="relative">
+          <input 
+            type="text" 
+            id="bootloader_sn" 
+            class="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 text-sm font-mono"
+            placeholder="Ingresa tu SN de bootloader de 64 caracteres"
+            maxlength="100"
+            data-translate-placeholder="input_placeholder"
+          >
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+            <i class="fas fa-hashtag text-slate-400"></i>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mt-2" data-translate="privacy_note">
+          <i class="fas fa-shield-alt mr-1"></i>
+          Tu entrada se procesa localmente y nunca se envía a ningún servidor.
+        </p>
+      </div>
+
+      <!-- Generate Button -->
+      <button 
+        onclick="embedAndDownload()" 
+        class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-cyan-500/50 flex items-center justify-center space-x-2"
+      >
+        <i class="fas fa-cog animate-spin mr-2"></i>
+        <span data-translate="generate_button">Generar sn.img</span>
+      </button>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="hidden mt-4 p-4 bg-red-900/50 border border-red-500/50 rounded-lg text-red-200 flex items-center">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span></span>
+      </div>
+
+      <!-- Hex Output -->
+      <div id="hexOutput" class="hidden mt-6 bg-slate-900/80 rounded-lg p-4 border border-slate-700">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-white font-semibold flex items-center text-sm" data-translate="hex_output_title">
+            <i class="fas fa-code text-green-400 mr-2"></i>
+            Vista Hexadecimal
+          </h3>
+          <button onclick="copyHexOutput()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        <pre class="text-green-300 text-xs font-mono overflow-x-auto whitespace-pre-wrap max-h-64"></pre>
+      </div>
+        </div>
+      </div>
+
+      <!-- Right Side: Commands and Example (50%) -->
+      <div class="sidebar-cards">
+        <!-- Commands Section -->
+        <div class="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 animate-slide-up" style="animation-delay: 0.2s;">
+          <h3 class="text-lg font-bold text-white mb-3 flex items-center" data-translate="unlock_commands_title">
+            <i class="fas fa-terminal text-purple-400 mr-3"></i>
+            Comandos de Desbloqueo
+          </h3>
+          <div class="space-y-3">
+            <div class="bg-slate-900/50 rounded-lg p-3">
+              <code class="text-cyan-300 text-sm">fastboot flash unlock sn.img</code>
+            </div>
+            <div class="bg-slate-900/50 rounded-lg p-3">
+              <code class="text-cyan-300 text-sm">fastboot oem unlock</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample Section -->
+        <div class="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 animate-slide-up" style="animation-delay: 0.4s;">
+          <h3 class="text-base font-semibold text-white mb-3 flex items-center" data-translate="example_title">
+            <i class="fas fa-lightbulb text-yellow-400 mr-2"></i>
+            Ejemplo de SN Válido:
+          </h3>
+          <code class="block bg-slate-900/70 text-green-300 p-3 rounded text-xs font-mono break-all">
+            99EE50221221864D50C60BAEA6F14D8AC2E235CC6E78BE6088CD40CC97FCA394
+          </code>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Footer -->
+    <div class="text-center mt-8 text-sm animate-fade-in" style="animation-delay: 0.6s;">
+      <p class="flex items-center justify-center space-x-2 text-center leading-snug text-green-400" data-translate="footer_text">
+        <span>Tus datos no salen de esta página. 100% local, privado y seguro 🛡️</span>
+        <i class="fas fa-shield-alt text-green-400"></i>
+      </p>
+    </div>
   </div>
 
   <script>
+    // Translation system
+    const translations = {
+      es: {
+        title: "Generador de Código Bootloader",
+        subtitle: "Lenovo - Desbloqueo de Bootloader",
+        instructions_title: "Instrucciones",
+        description: "Genera un archivo sn.img para dispositivos Lenovo de nueva generación.",
+        fastboot_title: "Obtener SN del Bootloader:",
+        adb_title: "Alternativa ADB:",
+        important_note: "Importante: El SN debe tener exactamente 64 caracteres.",
+        input_label: "Número de Serie del Bootloader",
+        input_placeholder: "Ingresa tu SN de bootloader de 64 caracteres",
+        privacy_note: "Tu entrada se procesa localmente y nunca se envía a ningún servidor.",
+        generate_button: "Generar sn.img",
+        hex_output_title: "Vista Hexadecimal",
+        unlock_commands_title: "Comandos de Desbloqueo",
+        example_title: "Ejemplo de SN Válido:",
+        footer_text: "Tus datos no salen de esta página. 100% local, privado y seguro 🛡️",
+        invalid_length: "Longitud de SN inválida ({length}). Debe ser exactamente 64 caracteres.",
+        processing_error: "Error al procesar el SN. Por favor, verifica que sea válido.",
+        characters_remaining: "Faltan {count} caracteres",
+        valid_sn: "¡SN válido! Puedes generar el archivo",
+        too_many_characters: "Demasiados caracteres ({current}/{max})"
+      },
+      en: {
+        title: "Bootloader Code Generator",
+        subtitle: "Lenovo - Bootloader Unlock",
+        instructions_title: "Instructions",
+        description: "Generate an sn.img file for Lenovo new-gen devices.",
+        fastboot_title: "Get Bootloader SN:",
+        adb_title: "ADB Alternative:",
+        important_note: "Important: The SN must be exactly 64 characters.",
+        input_label: "Bootloader Serial Number",
+        input_placeholder: "Enter your 64-character bootloader SN",
+        privacy_note: "Your input is processed locally and never sent to any server.",
+        generate_button: "Generate sn.img",
+        hex_output_title: "Hexadecimal View",
+        unlock_commands_title: "Unlock Commands",
+        example_title: "Valid SN Example:",
+        footer_text: "Your data stays on this page. 100% local, private and secure 🛡️",
+        invalid_length: "Invalid SN length ({length}). Must be exactly 64 characters.",
+        processing_error: "Error processing SN. Please verify it's valid.",
+        characters_remaining: "{count} characters remaining",
+        valid_sn: "Valid SN! You can generate the file",
+        too_many_characters: "Too many characters ({current}/{max})"
+      }
+    };
+
+    let currentLanguage = 'en';
+
+    function translatePage(lang) {
+      currentLanguage = lang;
+      localStorage.setItem('bootloader-lang', lang);
+      
+      const elements = document.querySelectorAll('[data-translate]');
+      
+      elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      // Translate placeholders
+      const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+      placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+          element.placeholder = translations[lang][key];
+        }
+      });
+
+      // Update input validation messages
+      updateInputValidation();
+    }
+
+    function updateInputValidation() {
+      const input = document.getElementById('bootloader_sn');
+      if (!input) return;
+      
+      const length = input.value.length;
+      const maxLength = 64;
+      
+      if (length === 0) {
+        input.placeholder = translations[currentLanguage].input_placeholder;
+      } else if (length < maxLength) {
+        input.placeholder = translations[currentLanguage].characters_remaining.replace('{count}', maxLength - length);
+      } else if (length === maxLength) {
+        input.placeholder = translations[currentLanguage].valid_sn;
+      } else {
+        input.placeholder = translations[currentLanguage].too_many_characters.replace('{current}', length).replace('{max}', maxLength);
+      }
+    }
+
     function toHex(n){ return n.toString(16).padStart(2,'0'); }
 
     function renderHexView(buffer){
@@ -192,50 +455,197 @@ fastboot oem unlock</pre>
 
     function decrypt(c){ return c.map(h=>bruteForce(h)).join(''); }
 
-    function embedAndDownload(){
-      const bootloader_sn_raw=document.getElementById("bootloader_sn").value.trim();
-      const errorDiv=document.getElementById("errorMessage");
-      const hexOutput=document.getElementById("hexOutput");
+    function showError(message) {
+      const errorDiv = document.getElementById("errorMessage");
+      const span = errorDiv.querySelector("span");
+      span.textContent = message;
+      errorDiv.classList.remove("hidden");
+      errorDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 
-      if(bootloader_sn_raw.length!==64){
-        errorDiv.textContent=`Invalid SN length (${bootloader_sn_raw.length}). Must be 64 chars.`;
-        errorDiv.style.display='block';
-        hexOutput.style.display='none';
+    function hideError() {
+      const errorDiv = document.getElementById("errorMessage");
+      errorDiv.classList.add("hidden");
+    }
+
+    function copyHexOutput() {
+      const hexOutput = document.querySelector("#hexOutput pre");
+      const text = hexOutput.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        // Show success feedback
+        const button = document.querySelector("#hexOutput button");
+        const icon = button.querySelector("i");
+        const originalClass = icon.className;
+        
+        icon.className = "fas fa-check text-green-400";
+        setTimeout(() => {
+          icon.className = originalClass;
+        }, 2000);
+      }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      });
+    }
+
+    function embedAndDownload(){
+      const bootloader_sn_raw = document.getElementById("bootloader_sn").value.trim();
+      const hexOutput = document.getElementById("hexOutput");
+      const button = document.querySelector("button[onclick='embedAndDownload()']");
+      const buttonIcon = button.querySelector("i");
+      
+      // Reset button state
+      buttonIcon.className = "fas fa-cog mr-2";
+      
+      if(bootloader_sn_raw.length !== 64){
+        showError(translations[currentLanguage].invalid_length.replace('{length}', bootloader_sn_raw.length));
+        hexOutput.classList.add("hidden");
         return;
       }
-      errorDiv.style.display='none';
+      
+      hideError();
+      
+      // Show loading state
+      buttonIcon.className = "fas fa-spinner fa-spin mr-2";
+      button.disabled = true;
 
-      const buffer=new Uint8Array(356);
-      const dataView=new DataView(buffer.buffer);
+      // Simulate processing time for better UX
+      setTimeout(() => {
+        try {
+          const buffer = new Uint8Array(356);
+          const dataView = new DataView(buffer.buffer);
 
       // magic
-      const magick=decrypt([1975295784,194624194,1088619615,1081284416,692051391,1376873270,100939420,396494126,1829556931,396494126,1384215601,785734634,497524095,1672444088,793070989,1376873270]);
-      let pos=0;
-      for(let i=0;i<magick.length;i++){ buffer[i+pos]=magick.charCodeAt(i);}
-      pos+=magick.length;
+          const magick = decrypt([1975295784,194624194,1088619615,1081284416,692051391,1376873270,100939420,396494126,1829556931,396494126,1384215601,785734634,497524095,1672444088,793070989,1376873270]);
+          let pos = 0;
+          for(let i = 0; i < magick.length; i++){ 
+            buffer[i + pos] = magick.charCodeAt(i);
+          }
+          pos += magick.length;
 
       // version major & minor
-      dataView.setUint32(pos,0,true); pos+=4;
-      dataView.setUint32(pos,1,true); pos+=4;
-      pos+=8; // unknown
-      dataView.setUint32(pos,1,true); pos+=4;
+          dataView.setUint32(pos, 0, true); pos += 4;
+          dataView.setUint32(pos, 1, true); pos += 4;
+          pos += 8; // unknown
+          dataView.setUint32(pos, 1, true); pos += 4;
 
       // bootloader SN
-      for(let i=0;i<bootloader_sn_raw.length;i++){ buffer[i+pos]=bootloader_sn_raw.charCodeAt(i);}
-      pos+=256; // garbage
+          for(let i = 0; i < bootloader_sn_raw.length; i++){ 
+            buffer[i + pos] = bootloader_sn_raw.charCodeAt(i);
+          }
+          pos += 256; // garbage
 
-      hexOutput.textContent=renderHexView(buffer);
-      hexOutput.style.display='block';
+          // Update hex output
+          const hexPre = hexOutput.querySelector("pre");
+          hexPre.textContent = renderHexView(buffer);
+          hexOutput.classList.remove("hidden");
+          
+          // Scroll to hex output
+          hexOutput.scrollIntoView({ behavior: "smooth", block: "center" });
 
-      const blob=new Blob([buffer],{type:"application/octet-stream"});
-      const link=document.createElement("a");
-      link.href=URL.createObjectURL(blob);
-      link.download="sn.img";
+          // Download file
+          const blob = new Blob([buffer], {type: "application/octet-stream"});
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "sn.img";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
+          
+          // Success feedback
+          buttonIcon.className = "fas fa-check mr-2";
+          setTimeout(() => {
+            buttonIcon.className = "fas fa-cog mr-2";
+          }, 2000);
+          
+        } catch (error) {
+          showError(translations[currentLanguage].processing_error);
+          buttonIcon.className = "fas fa-cog mr-2";
+        } finally {
+          button.disabled = false;
+        }
+      }, 800);
     }
+
+    // Add input validation and character counter
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('bootloader_sn');
+      
+      input.addEventListener('input', function() {
+        const length = this.value.length;
+        const maxLength = 64;
+        
+        // Update placeholder dynamically
+        updateInputValidation();
+        
+        // Change border color based on length
+        this.classList.remove('border-red-500', 'border-yellow-500', 'border-green-500');
+        if (length === 0) {
+          this.classList.add('border-slate-600');
+        } else if (length < maxLength) {
+          this.classList.add('border-yellow-500');
+        } else if (length === maxLength) {
+          this.classList.add('border-green-500');
+        } else {
+          this.classList.add('border-red-500');
+        }
+      });
+      
+      // Allow Enter key to trigger generation
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.length === 64) {
+          embedAndDownload();
+        }
+      });
+
+      // Language dropdown (custom)
+      const langBtn = document.getElementById('langBtn');
+      const langMenu = document.getElementById('langMenu');
+      const langDropdown = document.getElementById('langDropdown');
+
+      function renderLangButton(lang) {
+        if (!langBtn) return;
+        if (lang === 'en') {
+          langBtn.innerHTML = '<span class="inline-block w-5 h-3 mr-1"><svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><clipPath id="u"><path d="M0,0 v30 h60 v-30 z"/></clipPath><path fill="#bd3d44" d="M0,0 v30 h60 v-30 z"/><path stroke="#fff" stroke-width="6" d="M0,5 h60 M0,15 h60 M0,25 h60"/><path fill="#192f5d" d="M0,0 v18 h24 v-18 z"/></svg></span><span>English</span>';
+        } else {
+          langBtn.innerHTML = '<span class="inline-block w-5 h-3 mr-1"><svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><path fill="#c60b1e" d="M0 0h60v30H0z"/><path fill="#ffc400" d="M0 7h60v16H0z"/></svg></span><span>Español</span>';
+        }
+      }
+
+      function setLanguage(lang) {
+        translatePage(lang);
+        renderLangButton(lang);
+      }
+
+      if (langBtn && langMenu) {
+        langBtn.addEventListener('click', () => {
+          langMenu.classList.toggle('hidden');
+        });
+        langMenu.querySelectorAll('[data-lang]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const lang = btn.getAttribute('data-lang');
+            setLanguage(lang);
+            langMenu.classList.add('hidden');
+          });
+        });
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+          if (!langDropdown.contains(e.target)) {
+            langMenu.classList.add('hidden');
+          }
+        });
+      }
+
+      // Initialize with saved language or default (English)
+      const savedLanguage = localStorage.getItem('bootloader-lang') || 'en';
+      setLanguage(savedLanguage);
+    });
   </script>
 </body>
 </html>
